@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Diagrama POS Gasolinera</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>mermaid.initialize({ startOnLoad: true });</script>
+</head>
+<body>
+  <h2>Diagrama de Contexto – Punto de Venta</h2>
+
+  <div class="mermaid">
+flowchart LR
+  POS["Punto de Venta (POS)<br/>──────────────<br/>Market | Bombas"]
+  POS2["Punto de Venta (POS) - Estación B<br/>──────────────<br/>Market | Bombas"]
+
+  FE["Infile Factura Electrónica"]
+  FUS["Fusion (Control Bombas)"]
+  PUMPS["Bombas / Dispensadores"]
+  INV["Sistema Inventario Físicos"]
+  REC["Sistema Producción y Recetas"]
+  SC["Servidor Central (Multi-Estación)"]
+  SAP["SAP Business One"]
+
+  POS -->|"JSON factura"| FE
+  FE -->|"Respuesta FE (OK/Error)"| POS
+  POS <-->|"Autoriza despacho / lecturas / totales"| FUS
+  FUS <-->|"Liberar bomba / datos despacho"| PUMPS
+  POS <-->|"Movimientos / tomas físicas / kardex"| INV
+  POS <-->|"Recetas / consumo / producción"| REC
+  POS <-->|"Datos / ventas / sincronización"| SC
+  POS2 <-->|"Datos / ventas / sincronización"| SC
+  SC <-->|"Integración"| SAP
+  </div>
+
+</body>
+</html>
+
