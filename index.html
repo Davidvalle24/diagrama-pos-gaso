@@ -1,17 +1,63 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Diagrama POS Gasolinera</title>
+
   <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
-  <script>mermaid.initialize({ startOnLoad: true });</script>
+  <script>
+    mermaid.initialize({ startOnLoad: true, securityLevel: "loose" });
+  </script>
+
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    .hint { color: #666; margin-top: -8px; margin-bottom: 14px; font-size: 14px; }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.55);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 9999;
+    }
+    .modal {
+      background: #fff;
+      max-width: 720px;
+      width: 100%;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+      overflow: hidden;
+    }
+    .modal-header {
+      padding: 14px 16px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #eee;
+    }
+    .modal-body { padding: 14px 16px; line-height: 1.45; }
+    .modal-body ul { margin-top: 8px; }
+    .close-btn {
+      border: none; background: #eee; padding: 8px 10px;
+      border-radius: 10px; cursor: pointer; font-weight: 600;
+    }
+    .close-btn:hover { background: #e3e3e3; }
+    .tag { display:inline-block; font-size: 12px; background:#f2f2f2; padding:3px 8px; border-radius:999px; margin-right:6px; }
+  </style>
 </head>
+
 <body>
   <h2>Diagrama de Contexto – Punto de Venta</h2>
+  <div class="hint">Tip: hacé clic en una caja (Infile, Fusion, Servidor Central, etc.) para ver la explicación.</div>
 
   <div class="mermaid">
 flowchart LR
-  POS["Punto de Venta (POS)<br/>──────────────<br/>Market | Bombas"]
+  POS["Punto de Venta (POS) - Estación A<br/>──────────────<br/>Market | Bombas"]
   POS2["Punto de Venta (POS) - Estación B<br/>──────────────<br/>Market | Bombas"]
 
   FE["Infile Factura Electrónica"]
@@ -24,15 +70,155 @@ flowchart LR
 
   POS -->|"JSON factura"| FE
   FE -->|"Respuesta FE (OK/Error)"| POS
+
   POS <-->|"Autoriza despacho / lecturas / totales"| FUS
   FUS <-->|"Liberar bomba / datos despacho"| PUMPS
+
   POS <-->|"Movimientos / tomas físicas / kardex"| INV
   POS <-->|"Recetas / consumo / producción"| REC
   POS <-->|"Datos / ventas / sincronización"| SC
   POS2 <-->|"Datos / ventas / sincronización"| SC
+
   SC <-->|"Integración"| SAP
+
+  %% Click actions -> navigates to an anchor (hash)
+  click FE "#infile"
+  click FUS "#fusion"
+  click PUMPS "#bombas"
+  click INV "#inventario"
+  click REC "#recetas"
+  click SC "#central"
+  click SAP "#sap"
+  click POS "#pos"
+  click POS2 "#pos2"
   </div>
 
+  <!-- Modal -->
+  <div id="backdrop" class="modal-backdrop" role="dialog" aria-modal="true">
+    <div class="modal">
+      <div class="modal-header">
+        <div id="modalTitle">Detalle</div>
+        <button class="close-btn" id="closeBtn">Cerrar ✕</button>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+    </div>
+  </div>
+
+  <script>
+    const DETAILS = {
+      infile: {
+        title: "Infile – Factura Electrónica",
+        body: `
+          <div><span class="tag">Entrada</span> JSON de factura/NC desde el POS</div>
+          <div><span class="tag">Salida</span> Respuesta FE (OK/Error) + mensajes</div>
+          <p><b>¿Qué hace?</b> Procesa el documento electrónico y devuelve el estado para que el POS confirme y registre la venta.</p>
+          <ul>
+            <li>Recibe: datos de cliente, totales, impuestos, líneas.</li>
+            <li>Devuelve: aceptación/rechazo y detalles del motivo.</li>
+          </ul>
+        `
+      },
+      fusion: {
+        title: "Fusion – Control de Bombas",
+        body: `
+          <div><span class="tag">Función</span> Autorizar despacho y capturar lecturas/totales</div>
+          <p><b>¿Qué hace?</b> El POS solicita autorización indicando bomba y límite (galones o monto). Fusion libera la bomba y luego retorna el consumo real.</p>
+          <ul>
+            <li>Autoriza / bloquea bombas.</li>
+            <li>Reporta: litros/galones, total, fin de despacho, estados.</li>
+          </ul>
+        `
+      },
+      bombas: {
+        title: "Bombas / Dispensadores",
+        body: `
+          <p>Equipo físico de despacho. Recibe autorización desde Fusion y devuelve datos del consumo real (volumen, total, estado).</p>
+        `
+      },
+      inventario: {
+        title: "Sistema de Inventario Físicos",
+        body: `
+          <p>Gestiona tomas físicas, ajustes y kardex del Market (y/o lubricantes si aplica).</p>
+          <ul>
+            <li>Movimientos de inventario</li>
+            <li>Toma física / diferencias</li>
+            <li>Kardex (unidades/costo)</li>
+          </ul>
+        `
+      },
+      recetas: {
+        title: "Sistema de Producción y Recetas",
+        body: `
+          <p>Controla recetas y consumo de insumos cuando se venden productos preparados (comida/bebidas).</p>
+          <ul>
+            <li>Recetas y rendimiento</li>
+            <li>Consumo automático de insumos</li>
+            <li>Producción / mermas</li>
+          </ul>
+        `
+      },
+      central: {
+        title: "Servidor Central (Multi-Estación)",
+        body: `
+          <p><b>Consolida</b> ventas, maestros, precios y sincronización desde múltiples estaciones/tiendas.</p>
+          <ul>
+            <li>Recibe ventas de POS A, POS B, etc.</li>
+            <li>Distribuye catálogos y precios.</li>
+            <li>Integra con ERP (SAP Business One).</li>
+          </ul>
+        `
+      },
+      sap: {
+        title: "SAP Business One",
+        body: `
+          <p>ERP donde se integra información del Servidor Central para procesos administrativos (contabilidad, inventario, reportes, etc.).</p>
+        `
+      },
+      pos: {
+        title: "Punto de Venta (POS) – Estación A",
+        body: `
+          <p>Registra ventas de <b>Market</b> y <b>Combustible</b>. Orquesta el proceso: cobra, factura y sincroniza.</p>
+        `
+      },
+      pos2: {
+        title: "Punto de Venta (POS) – Estación B",
+        body: `
+          <p>Otro POS adicional para demostrar que el Servidor Central atiende varias estaciones/tiendas.</p>
+        `
+      }
+    };
+
+    const backdrop = document.getElementById("backdrop");
+    const modalTitle = document.getElementById("modalTitle");
+    const modalBody = document.getElementById("modalBody");
+    const closeBtn = document.getElementById("closeBtn");
+
+    function openModal(key) {
+      const info = DETAILS[key];
+      if (!info) return;
+      modalTitle.textContent = info.title;
+      modalBody.innerHTML = info.body;
+      backdrop.style.display = "flex";
+    }
+
+    function closeModal() {
+      backdrop.style.display = "none";
+      // limpia el hash para que no vuelva a abrir al refrescar
+      history.replaceState(null, "", window.location.pathname + window.location.search);
+    }
+
+    function checkHash() {
+      const key = window.location.hash.replace("#", "");
+      if (key) openModal(key);
+    }
+
+    window.addEventListener("hashchange", checkHash);
+    closeBtn.addEventListener("click", closeModal);
+    backdrop.addEventListener("click", (e) => { if (e.target === backdrop) closeModal(); });
+    window.addEventListener("keydown", (e) => { if (e.key === "Escape") closeModal(); });
+
+    // Si alguien entra con #infile directo, abre el modal
+    checkHash();
+  </script>
 </body>
 </html>
-
