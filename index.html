@@ -104,121 +104,161 @@ flowchart LR
     </div>
   </div>
 
-  <script>
-    const DETAILS = {
-      infile: {
-        title: "Infile – Factura Electrónica",
-        body: `
-          <div><span class="tag">Entrada</span> JSON de factura/NC desde el POS</div>
-          <div><span class="tag">Salida</span> Respuesta FE (OK/Error) + mensajes</div>
-          <p><b>¿Qué hace?</b> Procesa el documento electrónico y devuelve el estado para que el POS confirme y registre la venta.</p>
-          <ul>
-            <li>Recibe: datos de cliente, totales, impuestos, líneas.</li>
-            <li>Devuelve: aceptación/rechazo y detalles del motivo.</li>
-          </ul>
-        `
-      },
-      fusion: {
-        title: "Fusion – Control de Bombas",
-        body: `
-          <div><span class="tag">Función</span> Autorizar despacho y capturar lecturas/totales</div>
-          <p><b>¿Qué hace?</b> El POS solicita autorización indicando bomba y límite (galones o monto). Fusion libera la bomba y luego retorna el consumo real.</p>
-          <ul>
-            <li>Autoriza / bloquea bombas.</li>
-            <li>Reporta: litros/galones, total, fin de despacho, estados.</li>
-          </ul>
-        `
-      },
-      bombas: {
-        title: "Bombas / Dispensadores",
-        body: `
-          <p>Equipo físico de despacho. Recibe autorización desde Fusion y devuelve datos del consumo real (volumen, total, estado).</p>
-        `
-      },
-      inventario: {
-        title: "Sistema de Inventario Físicos",
-        body: `
-          <p>Gestiona tomas físicas, ajustes y kardex del Market (y/o lubricantes si aplica).</p>
-          <ul>
-            <li>Movimientos de inventario</li>
-            <li>Toma física / diferencias</li>
-            <li>Kardex (unidades/costo)</li>
-          </ul>
-        `
-      },
-      recetas: {
-        title: "Sistema de Producción y Recetas",
-        body: `
-          <p>Controla recetas y consumo de insumos cuando se venden productos preparados (comida/bebidas).</p>
-          <ul>
-            <li>Recetas y rendimiento</li>
-            <li>Consumo automático de insumos</li>
-            <li>Producción / mermas</li>
-          </ul>
-        `
-      },
-      central: {
-        title: "Servidor Central (Multi-Estación)",
-        body: `
-          <p><b>Consolida</b> ventas, maestros, precios y sincronización desde múltiples estaciones/tiendas.</p>
-          <ul>
-            <li>Recibe ventas de POS A, POS B, etc.</li>
-            <li>Distribuye catálogos y precios.</li>
-            <li>Integra con ERP (SAP Business One).</li>
-          </ul>
-        `
-      },
-      sap: {
-        title: "SAP Business One",
-        body: `
-          <p>ERP donde se integra información del Servidor Central para procesos administrativos (contabilidad, inventario, reportes, etc.).</p>
-        `
-      },
-      pos: {
-        title: "Punto de Venta (POS) – Estación A",
-        body: `
-          <p>Registra ventas de <b>Market</b> y <b>Combustible</b>. Orquesta el proceso: cobra, factura y sincroniza.</p>
-        `
-      },
-      pos2: {
-        title: "Punto de Venta (POS) – Estación B",
-        body: `
-          <p>Otro POS adicional para demostrar que el Servidor Central atiende varias estaciones/tiendas.</p>
-        `
-      }
-    };
+ <script>
+  const DETAILS = {
+    infile: {
+      title: "Infile – Factura Electrónica",
+      body: `
+        <h3>Integración con INFILE</h3>
 
-    const backdrop = document.getElementById("backdrop");
-    const modalTitle = document.getElementById("modalTitle");
-    const modalBody = document.getElementById("modalBody");
-    const closeBtn = document.getElementById("closeBtn");
+        <p>
+          El sistema de Punto de Venta (POS) genera un archivo en formato <b>JSON</b>, el cual es enviado a <b>INFILE</b>.
+          Este sistema se encarga de validar la información y enviarla a certificación ante Hacienda.
+        </p>
 
-    function openModal(key) {
-      const info = DETAILS[key];
-      if (!info) return;
-      modalTitle.textContent = info.title;
-      modalBody.innerHTML = info.body;
-      backdrop.style.display = "flex";
+        <p>
+          En caso de que exista algún error durante la validación, INFILE retorna un mensaje de error al POS para su corrección.
+          Si el sistema POS funciona correctamente, no deberían presentarse errores durante este proceso.
+        </p>
+      `
+    },
+
+    fusion: {
+      title: "Fusion – Control de Bombas",
+      body: `
+        <h3>Integración con FUSION</h3>
+
+        <p>
+          El Punto de Venta (POS) se integra con <b>FUSION</b> para autorizar el despacho de combustible.
+          Al registrar una venta, el POS envía la solicitud indicando la bomba y el volumen de galones a dispensar.
+        </p>
+
+        <p>
+          La integración también se utiliza para pruebas de combustible y auditorías de economía, permitiendo controlar y registrar los despachos efectuados.
+        </p>
+      `
+    },
+
+    bombas: {
+      title: "Bombas / Dispensadores",
+      body: `
+        <p>
+          Equipo físico de despacho. Recibe autorización desde Fusion y devuelve datos del consumo real (volumen, total, estado).
+        </p>
+      `
+    },
+
+    inventario: {
+      title: "Sistema de Inventario Físicos",
+      body: `
+        <h3>Integración con HYPERION</h3>
+
+        <p>
+          El Punto de Venta (POS) genera un archivo <b>CSV</b> con el catálogo completo de productos del Market, incluyendo la existencia teórica (<i>on hand</i>) de cada artículo.
+        </p>
+
+        <p>
+          El dispositivo <i>hand held</i> descarga este archivo para ejecutar el proceso de inventario físico, utilizando información como código, descripción y cantidades teóricas.
+        </p>
+
+        <p>
+          Al finalizar el conteo, el sistema permite comparar el inventario físico contra el inventario teórico, generando reportes de diferencias para su validación.
+        </p>
+      `
+    },
+
+    recetas: {
+      title: "Sistema de Producción y Recetas",
+      body: `
+        <h3>Integración con Sistema de Recetas</h3>
+
+        <p>
+          El sistema de Punto de Venta (POS) utiliza el sistema de recetas para realizar el descargue del inventario de los materiales utilizados en la preparación de productos.
+        </p>
+
+        <p>
+          En el caso de productos estándar, el descargue de inventario se realiza al momento de la venta.
+          Sin embargo, para productos de comida preparada, el descargue de los materiales se realiza al momento de su fabricación, conforme a la receta establecida.
+        </p>
+      `
+    },
+
+    central: {
+      title: "Servidor Central (Multi-Estación)",
+      body: `
+        <h3>Integración con Servidor Central</h3>
+
+        <p>
+          El sistema de Punto de Venta (POS) recibe desde el <b>Servidor Central</b> información como listas de precios, catálogo de artículos, usuarios, promociones y otros parámetros necesarios para la operación.
+        </p>
+
+        <p>
+          De forma bidireccional, el POS envía al Servidor Central las transacciones realizadas, movimientos de inventario, información de Kardex y demás datos operativos generados en la estación.
+        </p>
+      `
+    },
+
+    sap: {
+      title: "SAP Business One",
+      body: `
+        <h3>Integración del Servidor Central con SAP</h3>
+
+        <p>
+          El <b>Servidor Central</b> permite parametrizar los niveles de consolidación de datos que serán transmitidos al sistema <b>SAP</b>, facilitando la integración con los procesos administrativos y contables.
+        </p>
+
+        <p>
+          Asimismo, el Servidor Central recibe desde SAP información maestra necesaria para la operación de los puntos de venta, incluyendo catálogo de productos, proveedores y configuraciones relacionadas.
+        </p>
+      `
+    },
+
+    pos: {
+      title: "Punto de Venta (POS) – Estación A",
+      body: `
+        <p>
+          Registra ventas de <b>Market</b> y <b>Combustible</b>. Orquesta el proceso: cobra, factura y sincroniza.
+        </p>
+      `
+    },
+
+    pos2: {
+      title: "Punto de Venta (POS) – Estación B",
+      body: `
+        <p>
+          Otro POS adicional para demostrar que el Servidor Central atiende varias estaciones/tiendas.
+        </p>
+      `
     }
+  };
 
-    function closeModal() {
-      backdrop.style.display = "none";
-      // limpia el hash para que no vuelva a abrir al refrescar
-      history.replaceState(null, "", window.location.pathname + window.location.search);
-    }
+  const backdrop = document.getElementById("backdrop");
+  const modalTitle = document.getElementById("modalTitle");
+  const modalBody = document.getElementById("modalBody");
+  const closeBtn = document.getElementById("closeBtn");
 
-    function checkHash() {
-      const key = window.location.hash.replace("#", "");
-      if (key) openModal(key);
-    }
+  function openModal(key) {
+    const info = DETAILS[key];
+    if (!info) return;
+    modalTitle.textContent = info.title;
+    modalBody.innerHTML = info.body;
+    backdrop.style.display = "flex";
+  }
 
-    window.addEventListener("hashchange", checkHash);
-    closeBtn.addEventListener("click", closeModal);
-    backdrop.addEventListener("click", (e) => { if (e.target === backdrop) closeModal(); });
-    window.addEventListener("keydown", (e) => { if (e.key === "Escape") closeModal(); });
+  function closeModal() {
+    backdrop.style.display = "none";
+    history.replaceState(null, "", window.location.pathname + window.location.search);
+  }
 
-    // Si alguien entra con #infile directo, abre el modal
-    checkHash();
-  </script>
-</body>
-</html>
+  function checkHash() {
+    const key = window.location.hash.replace("#", "");
+    if (key) openModal(key);
+  }
+
+  window.addEventListener("hashchange", checkHash);
+  closeBtn.addEventListener("click", closeModal);
+  backdrop.addEventListener("click", (e) => { if (e.target === backdrop) closeModal(); });
+  window.addEventListener("keydown", (e) => { if (e.key === "Escape") closeModal(); });
+
+  checkHash();
+</script>
