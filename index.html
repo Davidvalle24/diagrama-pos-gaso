@@ -542,9 +542,10 @@
         <div class="value">20240206</div>
       </div>
 
-      <div class="box big-date">
-        <div class="value">02/02/2026</div>
-      </div>
+ <div class="box big-date">
+  <div class="value" id="sysDate">--/--/----</div>
+</div>
+
     </div>
   </div>
 
@@ -1011,15 +1012,18 @@ window.addEventListener("load", () => {
     document.body.classList.add("hide-topbar");
   }
 
-  // 2) Verificar si venís con hash (#infile, etc.)
+  // 2) Verificar hash (#infile, etc.)
   checkHash();
-  
-  if (window.mermaid && mermaid.run) {
-  mermaid.run();
-}
 
-  
+  // 3) Mermaid
+  if (window.mermaid && mermaid.run) {
+    mermaid.run();
+  }
+
+  // 4) Fecha del sistema
+  setSystemDate();
 });
+
 
 
 
@@ -1165,6 +1169,27 @@ document.addEventListener("click", (e) => {
     openModal(key);
   }
 });
+
+
+
+function pad2(n){ 
+  return String(n).padStart(2,"0"); 
+}
+
+function setSystemDate(){
+  const d = new Date(); // fecha del sistema
+  const dd = pad2(d.getDate());
+  const mm = pad2(d.getMonth() + 1);
+  const yyyy = d.getFullYear();
+
+  const formatted = `${dd}/${mm}/${yyyy}`;
+
+  const el = document.getElementById("sysDate");
+  if(el) el.textContent = formatted;
+}
+
+
+
 
 </script>
 
