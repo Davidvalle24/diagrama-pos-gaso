@@ -1,115 +1,1033 @@
 <!DOCTYPE html>
-<html lang="es">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Diagrama POS Gasolinera</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Demo Sistema POS</title>
 
-  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
-  <script>
-    mermaid.initialize({ startOnLoad: true, securityLevel: "loose" });
-  </script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    securityLevel: "loose"
+  });
+</script>
 
-  <style>
-    body { font-family: Arial, sans-serif; padding: 20px; }
-    .hint { color: #666; margin-top: -8px; margin-bottom: 14px; font-size: 14px; }
 
-    /* Modal */
-    .modal-backdrop {
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,0.55);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      z-index: 9999;
-    }
-    .modal {
-      background: #fff;
-      max-width: 720px;
-      width: 100%;
-      border-radius: 12px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.35);
-      overflow: hidden;
-    }
-    .modal-header {
-      padding: 14px 16px;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-bottom: 1px solid #eee;
-    }
-    .modal-body { padding: 14px 16px; line-height: 1.45; }
-    .modal-body ul { margin-top: 8px; }
-    .close-btn {
-      border: none; background: #eee; padding: 8px 10px;
-      border-radius: 10px; cursor: pointer; font-weight: 600;
-    }
-    .close-btn:hover { background: #e3e3e3; }
-    .tag { display:inline-block; font-size: 12px; background:#f2f2f2; padding:3px 8px; border-radius:999px; margin-right:6px; }
-  </style>
+<style>
+  :root{
+    --bg:#f6f7fb;
+    --card:#ffffff;
+    --border:#e5e7eb;
+    --text:#111827;
+    --muted:#6b7280;
+    --primary:#2563eb;
+
+    --sidebar:#1f2d3d;
+    --sidebarBtn:#32465a;
+    --sidebarBtnHover:#3f5870;
+  }
+
+  *{ box-sizing:border-box; }
+
+  body{
+    margin:0;
+    font-family:Arial, sans-serif;
+    background:var(--bg);
+    color:var(--text);
+  }
+
+  /* LAYOUT */
+  .container{
+    display:flex;
+    min-height:100vh;
+  }
+
+  /* SIDEBAR */
+  .sidebar{
+    width:260px;
+    background:var(--sidebar);
+    color:white;
+    padding:18px;
+  }
+
+  .sidebar h2{
+    font-size:18px;
+    margin:0 0 14px 0;
+  }
+
+  .sidebar .groupTitle{
+    font-size:12px;
+    opacity:.7;
+    margin:16px 0 8px 0;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+  }
+
+  .sidebar button{
+    width:100%;
+    margin-top:10px;
+    padding:10px 12px;
+    border:none;
+    border-radius:10px;
+    background:var(--sidebarBtn);
+    color:white;
+    cursor:pointer;
+    text-align:left;
+  }
+
+  .sidebar button:hover{
+    background:var(--sidebarBtnHover);
+  }
+
+  .sidebar button.active{
+    outline:2px solid rgba(255,255,255,.35);
+    background:#22374d;
+  }
+
+  /* MAIN */
+  .main{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    min-width:0;
+  }
+
+/* ===== TOPBAR SISTEMA (estructura) ===== */
+.topbar-sys{
+  display:flex;
+  gap:16px;
+  padding:10px;
+  border-bottom:1px solid #000;
+}
+
+/* ZONAS */
+.sys-left,
+.sys-center,
+.sys-right{
+  display:flex;
+  gap:10px;
+  align-items:flex-start;
+}
+
+/* IZQUIERDA */
+.sys-left{
+  min-width:260px;
+  align-items:center;
+}
+
+.company-name{
+  font-weight:bold;
+  font-size:13px;
+}
+.company-sub{
+  font-size:12px;
+}
+
+/* CENTRO */
+.sys-center{
+  flex:1;
+  flex-direction:column;
+  align-items:center;
+}
+
+.station{
+  font-weight:bold;
+  margin-top:4px;
+  letter-spacing:1px;
+}
+
+/* DERECHA */
+.sys-right{
+  min-width:260px;
+  flex-direction:column;
+  align-items:flex-end;
+}
+
+/* FILAS */
+.row{
+  display:flex;
+  gap:12px;
+  align-items:center;
+}
+.row.right{
+  align-items:stretch;
+}
+
+/* CAJAS GENERALES */
+.box{
+  border:1px solid #000;
+  padding:4px 8px;
+  min-height:28px;
+}
+
+/* CAMPOS */
+.field{
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+.label{
+  font-weight:bold;
+  font-size:12px;
+}
+.value{
+  font-weight:bold;
+}
+
+/* TAMAÑOS */
+.small{
+  min-width:90px;
+}
+.big-date{
+  min-width:120px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:bold;
+}
+.logo-box{
+  width:60px;
+  height:40px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:bold;
+}
+.user{
+  min-width:120px;
+  text-align:center;
+  font-weight:bold;
+}
+
+
+  .pill{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:999px;
+    padding:8px 12px;
+    font-size:13px;
+    color:var(--muted);
+  }
+
+  .pill strong{
+    color:var(--text);
+    margin-left:6px;
+  }
+
+  .topbar .brand{
+    font-weight:700;
+    color:#0f172a;
+  }
+
+  /* CONTENT */
+  .content{
+    padding:18px;
+    overflow:auto;
+  }
+
+  .section{ display:none; }
+  .section.active{ display:block; }
+
+  /* CARD */
+  .card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:16px;
+    margin:14px 0;
+  }
+
+  /* TABS (dentro de Sistema) */
+  .tabs{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    margin:10px 0 14px 0;
+  }
+  .tab{
+    padding:10px 14px;
+    border-radius:10px;
+    border:1px solid var(--border);
+    background:#f3f4f6;
+    cursor:pointer;
+    font-weight:600;
+    color:#374151;
+  }
+  .tab.active{
+    background:var(--card);
+    border-bottom:3px solid var(--primary);
+    color:var(--text);
+  }
+
+  /* GRID MENU (Maestros) */
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(2, minmax(0, 1fr));
+    gap:14px;
+  }
+
+  .tile{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:16px;
+    cursor:pointer;
+    transition:transform .08s ease, box-shadow .08s ease;
+  }
+
+  .tile:hover{
+    transform:translateY(-1px);
+    box-shadow:0 8px 20px rgba(0,0,0,.06);
+  }
+
+  .tileTitle{
+    font-weight:700;
+    margin:0 0 6px 0;
+  }
+  .tileDesc{
+    margin:0;
+    color:var(--muted);
+    font-size:13px;
+  }
+
+  /* Responsive */
+  @media (max-width: 820px){
+    .sidebar{ width:210px; }
+    .grid{ grid-template-columns:1fr; }
+    .topbar{ align-items:flex-start; flex-direction:column; }
+  }
+  
+  .hint{
+  color: var(--muted);
+  margin-top: -8px;
+  margin-bottom: 10px;
+  font-size: 13px;
+}
+
+/* Modal */
+.modal-backdrop{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(15,23,42,.55);
+  align-items:center;
+  justify-content:center;
+  padding:16px;
+  z-index:9999;
+}
+
+.modal{
+  width:min(860px, 96vw);
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:16px;
+  overflow:hidden;
+  box-shadow:0 20px 60px rgba(0,0,0,.25);
+}
+
+.modal-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:14px 16px;
+  background:#f8fafc;
+  border-bottom:1px solid var(--border);
+  font-weight:700;
+}
+
+.modal-body{
+  padding:16px;
+  color:#111827;
+  max-height:70vh;
+  overflow:auto;
+}
+
+.close-btn{
+  border:1px solid var(--border);
+  background:#fff;
+  border-radius:10px;
+  padding:8px 10px;
+  cursor:pointer;
+}
+
+.close-btn:hover{
+  background:#f3f4f6;
+}
+
+/* Ajustes para diagrama Mermaid */
+.card .mermaid{
+  overflow-x: auto;      /* permite scroll horizontal si el diagrama es ancho */
+  padding-bottom: 10px;
+}
+
+.card .mermaid svg{
+  max-width: 100%;
+  height: auto;
+}
+
+
+.card{
+  overflow:auto;
+}
+
+/* Ocultar topbar cuando el body tenga la clase hide-topbar */
+.hide-topbar .topbar,
+.hide-topbar .topbar-sys { 
+  display: none; 
+}
+
+.hide-topbar .content { padding-top: 18px; } /* para que no quede raro */
+
+.topbar{
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+#sistema .sys-title,
+#sistema .sys-sub{
+  display:none;
+}
+
+ 
+  
+  
+  /* Layout EXACTO de 3 columnas como el sistema original */
+.menu-3cols{
+  display:grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap:18px;
+  align-items:start;
+}
+
+/* cada columna es una “pila” */
+.menu-col{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+
+/* Responsive */
+@media (max-width: 1100px){
+  .menu-3cols{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 820px){
+  .menu-3cols{ grid-template-columns: 1fr; }
+}
+
+  
+
+/* ===== Layout EXACTO de 3 columnas para Movimientos ===== */
+.menu-3cols{
+  display:grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap:18px;
+  align-items:start;
+}
+
+.menu-col{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+
+/* Responsive (opcional) */
+@media (max-width: 1100px){
+  .menu-3cols{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 820px){
+  .menu-3cols{ grid-template-columns: 1fr; }
+}
+
+/* Ocultar títulos dentro de Sistema */
+#sistema .sys-title,
+#sistema .sys-sub{
+  display:none;
+}
+
+/* ===== Layout EXACTO de 3 columnas para Movimientos ===== */
+.menu-3cols{
+  display:grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap:18px;
+  align-items:start;
+}
+
+.menu-col{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+
+/* Responsive */
+@media (max-width: 1100px){
+  .menu-3cols{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 820px){
+  .menu-3cols{ grid-template-columns: 1fr; }
+}
+
+.tile.disabled{
+  opacity:.45;
+  cursor:not-allowed;
+  pointer-events:none;
+}
+
+
+
+  
+</style>
 </head>
 
-<body>
-  <h2>Diagrama de Contexto – Punto de Venta</h2>
-  <div class="hint">Tip: hacé clic en una caja (Infile, Fusion, Servidor Central, etc.) para ver la explicación.</div>
+<body class="hide-topbar">
 
-  <div class="mermaid">
-flowchart LR
-  POS["Punto de Venta (POS) - Estación A<br/>──────────────<br/>Market | Bombas"]
-  POS2["Punto de Venta (POS) - Estación B<br/>──────────────<br/>Market | Bombas"]
+<div class="container">
 
-  FE["Infile Factura Electrónica"]
-  FUS["Fusion (Control Bombas)"]
-  PUMPS["Bombas / Dispensadores"]
-  INV["Sistema Inventario Físicos"]
-  REC["Sistema Producción y Recetas"]
-  SC["Servidor Central (Multi-Estación)"]
-  SAP["SAP Business One"]
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <h2>Demo Sistema</h2>
 
-  POS -->|"JSON factura"| FE
-  FE -->|"Respuesta FE (OK/Error)"| POS
+    <div class="groupTitle">Documentación</div>
+    <button id="btn-contexto" class="active" onclick="showSection('contexto', this)">Diagrama de Contexto</button>
 
-  POS <-->|"Autoriza despacho / lecturas / totales"| FUS
-  FUS <-->|"Liberar bomba / datos despacho"| PUMPS
-
-  POS <-->|"Movimientos / tomas físicas / kardex"| INV
-  POS <-->|"Recetas / consumo / producción"| REC
-  POS <-->|"Datos / ventas / sincronización"| SC
-  POS2 <-->|"Datos / ventas / sincronización"| SC
-
-  SC <-->|"Integración"| SAP
-
-  %% Click actions -> navigates to an anchor (hash)
-  click FE "#infile"
-  click FUS "#fusion"
-  click PUMPS "#bombas"
-  click INV "#inventario"
-  click REC "#recetas"
-  click SC "#central"
-  click SAP "#sap"
-  click POS "#pos"
-  click POS2 "#pos2"
+    <div class="groupTitle">Sistema</div>
+    <button id="btn-sistema" onclick="showSection('sistema', this)">Pantallas del Sistema</button>
   </div>
 
-  <!-- Modal -->
-  <div id="backdrop" class="modal-backdrop" role="dialog" aria-modal="true">
-    <div class="modal">
-      <div class="modal-header">
-        <div id="modalTitle">Detalle</div>
-        <button class="close-btn" id="closeBtn">Cerrar ✕</button>
-      </div>
-      <div class="modal-body" id="modalBody"></div>
+  <!-- MAIN -->
+  <div class="main">
+
+<div class="topbar-sys">
+
+  <!-- IZQUIERDA -->
+  <div class="sys-left">
+    <div class="box logo-box">LOGO</div>
+    <div class="company">
+      <div class="company-name">LUIGEMI S.A. de C.V.</div>
+      <div class="company-sub">Digital Computers</div>
     </div>
   </div>
 
- <script>
+  <!-- CENTRO -->
+  <div class="sys-center">
+    <div class="row">
+      <div class="field">
+        <span class="label">CAJA:</span>
+        <span class="value">00</span>
+      </div>
+
+      <div class="field">
+        <span class="label">TURNO:</span>
+        <span class="value">1</span>
+      </div>
+    </div>
+
+    <div class="station">PUMA APOPA</div>
+  </div>
+
+  <!-- DERECHA -->
+  <div class="sys-right">
+    <div class="box user">GILBERTO</div>
+
+    <div class="row right">
+      <div class="box small">
+        <div class="label">Datos al:</div>
+        <div class="value">19/11/2026</div>
+      </div>
+
+      <div class="box small">
+        <div class="label">V.</div>
+        <div class="value">20240206</div>
+      </div>
+
+      <div class="box big-date">
+        <div class="value">02/02/2026</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+    <!-- CONTENT -->
+    <div class="content">
+
+      <!-- SECCIÓN: CONTEXTO -->
+      <div id="contexto" class="section active">
+		<h2>Diagrama de Contexto – Punto de Venta</h2>
+		<div class="hint">Tip: hacé clic en una caja (Infile, Fusion, Servidor Central, etc.) para ver la explicación.</div>
+
+		<div class="card">
+		  <div class="mermaid">
+		flowchart LR
+		  POS["Punto de Venta (POS) - Estación A<br/>──────────────<br/>Market | Bombas"]
+		  POS2["Punto de Venta (POS) - Estación B<br/>──────────────<br/>Market | Bombas"]
+
+		  FE["Infile Factura Electrónica"]
+		  FUS["Fusion (Control Bombas)"]
+		  PUMPS["Bombas / Dispensadores"]
+		  INV["Sistema Inventario Físicos"]
+		  REC["Sistema Producción y Recetas"]
+		  SC["Servidor Central (Multi-Estación)"]
+		  SAP["SAP Business One"]
+
+		  POS -->|"JSON factura"| FE
+		  FE -->|"Respuesta FE (OK/Error)"| POS
+
+		  POS <-->|"Autoriza despacho / lecturas / totales"| FUS
+		  FUS <-->|"Liberar bomba / datos despacho"| PUMPS
+
+		  POS <-->|"Movimientos / tomas físicas / kardex"| INV
+		  POS <-->|"Recetas / consumo / producción"| REC
+		  POS <-->|"Datos / ventas / sincronización"| SC
+		  POS2 <-->|"Datos / ventas / sincronización"| SC
+
+		  SC <-->|"Integración"| SAP
+
+		  click FE "#infile"
+		  click FUS "#fusion"
+		  click PUMPS "#bombas"
+		  click INV "#inventario"
+		  click REC "#recetas"
+		  click SC "#central"
+		  click SAP "#sap"
+		  click POS "#pos"
+		  click POS2 "#pos2"
+		  </div>
+		</div>
+		</div> <!-- FIN contexto -->
+
+
+
+      <!-- SECCIÓN: SISTEMA (con tabs internos) -->
+      <div id="sistema" class="section">
+		<h2 class="sys-title">Pantallas del Sistema</h2>
+		<p class="sys-sub">Demo navegable (sin lógica de negocio)</p>
+
+
+        <div class="tabs">
+          <button class="tab active" onclick="showScreen('maestros', this)">Maestros</button>
+          <button class="tab" onclick="showScreen('movimientos', this)">Movimientos</button>
+          <button class="tab" onclick="showScreen('Anulaciones', this)">Anulaciones</button>
+		  <button class="tab" onclick="showScreen('Reportes', this)">Reportes</button>
+		  <button class="tab" onclick="showScreen('Utilerias', this)">Utilerias</button>
+		  <button class="tab" onclick="showScreen('Cierre', this)">Cierre</button>
+		  
+        </div>
+
+<!-- SCREEN: MAESTROS -->
+<div id="maestros" class="screen">
+  <div class="card">
+    <h3 style="margin:0 0 10px 0;">Maestros</h3>
+
+    <div class="grid">
+      <div class="tile" onclick="alert('Demo: Configuración')">
+        <p class="tileTitle">Configuración</p>
+        <p class="tileDesc">Parámetros generales del sistema</p>
+      </div>
+
+      <div class="tile" onclick="alert('Demo: Líneas de Negocio')">
+        <p class="tileTitle">Líneas de Negocio</p>
+        <p class="tileDesc">Market, Combustible, etc.</p>
+      </div>
+
+      <div class="tile" onclick="alert('Demo: Clientes')">
+        <p class="tileTitle">Clientes</p>
+        <p class="tileDesc">Gestión de clientes y datos</p>
+      </div>
+
+      <div class="tile" onclick="alert('Demo: Productos')">
+        <p class="tileTitle">Productos</p>
+        <p class="tileDesc">Catálogo y precios</p>
+      </div>
+
+      <div class="tile" onclick="alert('Demo: Vendedores')">
+        <p class="tileTitle">Vendedores</p>
+        <p class="tileDesc">Usuarios operativos</p>
+      </div>
+
+      <div class="tile" onclick="alert('Demo: Islas')">
+        <p class="tileTitle">Islas</p>
+        <p class="tileDesc">Islas / dispensadores</p>
+      </div>
+
+      <div class="tile" onclick="alert('Demo: Cajas')">
+        <p class="tileTitle">Cajas</p>
+        <p class="tileDesc">Cajas y configuraciones</p>
+      </div>
+
+      <div class="tile" onclick="alert('Demo: Niveles de Precio')">
+        <p class="tileTitle">Niveles de Precio</p>
+        <p class="tileDesc">Listas y niveles</p>
+      </div>
+
+      <div class="tile" onclick="alert('Demo: Tarjetas de Crédito')">
+        <p class="tileTitle">Tarjetas de Crédito</p>
+        <p class="tileDesc">Gestión de tarjetas de crédito</p>
+      </div>
+
+      <div class="tile" onclick="alert('Demo: Unidades de Medida')">
+        <p class="tileTitle">Unidades de Medida</p>
+        <p class="tileDesc">Detalles de unidades de medida</p>
+      </div>
+
+      <div class="tile" onclick="alert('Demo: Contraseña Usuarios')">
+        <p class="tileTitle">Contraseña Usuarios</p>
+        <p class="tileDesc">Gestión de contraseñas de usuarios</p>
+      </div>
+
+      <div class="tile" onclick="alert('Demo: Documentos')">
+        <p class="tileTitle">Documentos</p>
+        <p class="tileDesc">Documentos cargados</p>
+      </div>
+
+      <div class="tile" onclick="alert('Demo: Domicilios')">
+        <p class="tileTitle">Domicilios</p>
+        <p class="tileDesc">Gestión de domicilios</p>
+      </div>
+
+      <div class="tile" onclick="alert('Demo: Bancos')">
+        <p class="tileTitle">Bancos</p>
+        <p class="tileDesc">Catálogo de bancos</p>
+      </div>
+
+      <div class="tile" onclick="alert('Demo: Proveedores')">
+        <p class="tileTitle">Proveedores</p>
+        <p class="tileDesc">Lista de proveedores</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- SCREEN: MOVIMIENTOS -->
+<div id="movimientos" class="screen" style="display:none;">
+  <div class="card">
+    <h3 style="margin:0 0 10px 0;">Movimientos</h3>
+
+    <div class="menu-3cols">
+
+      <!-- COLUMNA 1 -->
+      <div class="menu-col">
+        <div class="tile" onclick="alert('Demo: N/C Devolución')"><p class="tileTitle">N/C Devolución</p></div>
+        <div class="tile" onclick="alert('Demo: N/C Descuento')"><p class="tileTitle">N/C Descuento</p></div>
+        <div class="tile" onclick="alert('Demo: Abonos Manual')"><p class="tileTitle">Abonos Manual</p></div>
+        <div class="tile" onclick="alert('Demo: Abonos Rutina')"><p class="tileTitle">Abonos Rutina</p></div>
+        <div class="tile" onclick="alert('Demo: Cargos Varios')"><p class="tileTitle">Cargos Varios</p></div>
+        <div class="tile" onclick="alert('Demo: Ingreso de Gastos')"><p class="tileTitle">Ingreso de Gastos</p></div>
+        <div class="tile" onclick="alert('Demo: Remesas a Banco')"><p class="tileTitle">Remesas a Banco</p></div>
+        <div class="tile" onclick="alert('Demo: Anticipos de Clientes')"><p class="tileTitle">Anticipos de Clientes</p></div>
+      </div>
+
+      <!-- COLUMNA 2 -->
+      <div class="menu-col">
+        <div class="tile" onclick="alert('Demo: Blindados')"><p class="tileTitle">Blindados</p></div>
+        <div class="tile" onclick="alert('Demo: Facturación Vales')"><p class="tileTitle">Facturación Vales</p></div>
+        <div class="tile" onclick="alert('Demo: Facturas de Relleno')"><p class="tileTitle">Facturas de Relleno</p></div>
+        <div class="tile" onclick="alert('Demo: Compras Inventario')"><p class="tileTitle">Compras Inventario</p></div>
+        <div class="tile" onclick="alert('Demo: Compras Gastos')"><p class="tileTitle">Compras Gastos</p></div>
+        <div class="tile" onclick="alert('Demo: Devolución Proveedores')"><p class="tileTitle">Devolución Proveedores</p></div>
+        <div class="tile" onclick="alert('Demo: Comp. de Retención')"><p class="tileTitle">Comp. de Retención</p></div>
+        <div class="tile" onclick="alert('Demo: Descuento Proveedores')"><p class="tileTitle">Descuento Proveedores</p></div>
+      </div>
+
+      <!-- COLUMNA 3 -->
+      <div class="menu-col">
+        <div class="tile" onclick="alert('Demo: Quedan')"><p class="tileTitle">Quedan</p></div>
+        <div class="tile" onclick="alert('Demo: Movimientos Inventario')"><p class="tileTitle">Movimientos Inventario</p></div>
+        <div class="tile" onclick="alert('Demo: Traslados Internos')"><p class="tileTitle">Traslados Internos</p></div>
+
+        <!-- espacio visual (en el sistema real queda “hueco” en medio) -->
+        <div style="height:34px;"></div>
+
+        <div class="tile" onclick="alert('Demo: Lecturas Bombas')"><p class="tileTitle">Lecturas Bombas</p></div>
+        <div class="tile" onclick="alert('Demo: Lecturas Tanques')"><p class="tileTitle">Lecturas Tanques</p></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- SCREEN: MOVIMIENTOS -->
+<div id="Anulaciones" class="screen" style="display:none;">
+  <div class="card">
+    <h3 style="margin:0 0 10px 0;">Anulaciones</h3>
+
+    <div class="menu-3cols">
+
+      <!-- COLUMNA 1 -->
+      <div class="menu-col">
+        <div class="tile" onclick="alert('Demo: Eliminar lineas de venta')"><p class="tileTitle">Eliminar lineas de venta</p></div>
+        <div class="tile" onclick="alert('Demo: Eliminar lineas de compras')"><p class="tileTitle">Eliminar lineas de compras</p></div>
+		        <!-- espacio visual (en el sistema real queda “hueco” en medio) -->
+        <div style="height:34px;"></div>
+        <div class="tile" onclick="alert('Demo: Eliminacion Gastos')"><p class="tileTitle">Eliminacion Gastos</p></div>
+        <div class="tile" onclick="alert('Demo: Eliminacion N/C')"><p class="tileTitle">Eliminacion N/C</p></div>
+        <div class="tile" onclick="alert('Demo: Eliminacion CCF')"><p class="tileTitle">Eliminacion CCF</p></div>
+        <div class="tile" onclick="alert('Demo: Eliminacion FAC')"><p class="tileTitle">Eliminacion FAC</p></div>
+
+      </div>
+
+      <!-- COLUMNA 2 -->
+      <div class="menu-col">
+        <div class="tile" onclick="alert('Demo: Anulacion CCF')"><p class="tileTitle">Anulacion CCF</p></div>
+		<div class="tile" onclick="alert('Demo: Anulacion N/C')"><p class="tileTitle">Anulacion N/C</p></div>
+		<div class="tile" onclick="alert('Demo: Anulacion FAC')"><p class="tileTitle">Anulacion FAC</p></div>
+		<div class="tile" onclick="alert('Demo: Anulacion VAL')"><p class="tileTitle">Anulacion VAL</p></div>
+		<div class="tile" onclick="alert('Demo: Anulacion CUP')"><p class="tileTitle">Anulacion CUP</p></div>		
+		<div class="tile" onclick="alert('Demo: Desanular CCF')"><p class="tileTitle">Desanular CCF</p></div>
+		<div class="tile" onclick="alert('Demo: Desanular FAC')"><p class="tileTitle">Desanular FAC</p></div>
+		<div class="tile" onclick="alert('Demo: Desanular VAL')"><p class="tileTitle">Desanular VAL</p></div>
+
+
+      </div>
+
+      <!-- COLUMNA 3 -->
+      <div class="menu-col">
+        <div class="tile" onclick="alert('Demo: Anulacion Compras')"><p class="tileTitle">Anulacion Compras</p></div>
+        <div class="tile" onclick="alert('Demo: Anular N/C')"><p class="tileTitle">Anular N/C</p></div>
+        <div class="tile" onclick="alert('Demo: Eliminar CRE')"><p class="tileTitle">Eliminar CRE</p></div>
+		<div class="tile" onclick="alert('Demo: Eliminacion VAL')"><p class="tileTitle">Eliminacion VAL</p></div>
+		<div class="tile" onclick="alert('Demo: Eliminacion CUP')"><p class="tileTitle">Eliminacion CUP</p></div>
+		<div class="tile" onclick="alert('Demo: Anular N/Remision')"><p class="tileTitle">Anular N/Remision</p></div>
+        <!-- espacio visual (en el sistema real queda “hueco” en medio) -->
+		<div style="height:57px;"></div>
+
+        <div class="tile" onclick="alert('Demo: Anular Abonos')"><p class="tileTitle">Anular Abonos</p></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- SCREEN: REPORTES -->
+<div id="Reportes" class="screen" style="display:none;">
+  <div class="card">
+    <h3 style="margin:0 0 10px 0;">Reportes</h3>
+
+    <div class="menu-3cols">
+
+      <!-- COLUMNA 1 -->
+
+      <div class="menu-col">
+        <div class="tile" onclick="alert('Demo: Facturación')"><p class="tileTitle">Facturación</p></div>
+        <div class="tile" onclick="alert('Demo: Liquidación')"><p class="tileTitle">Liquidación</p></div>
+        <div class="tile" onclick="alert('Demo: Vales')"><p class="tileTitle">Vales</p></div>
+        <div class="tile" onclick="alert('Demo: Handling')"><p class="tileTitle">Handling</p></div>
+        <div class="tile" onclick="alert('Demo: Ingresos')"><p class="tileTitle">Ingresos</p></div>
+        <div class="tile" onclick="alert('Demo: Tienda')"><p class="tileTitle">Tienda</p></div>
+        <div class="tile" onclick="alert('Demo: Diario X')"><p class="tileTitle">Diario X</p></div>
+        <div class="tile" onclick="alert('Demo: Diario Z')"><p class="tileTitle">Diario Z</p></div>
+      </div>
+
+      <!-- COLUMNA 2 -->
+      <div class="menu-col">
+        <div class="tile" onclick="alert('Demo: Mensual X')"><p class="tileTitle">Mensual X</p></div>
+        <div class="tile" onclick="alert('Demo: Mensual Z')"><p class="tileTitle">Mensual Z</p></div>
+        <div class="tile" onclick="alert('Demo: Abonos')"><p class="tileTitle">Abonos</p></div>
+        <div class="tile" onclick="alert('Demo: Notas de Crédito')"><p class="tileTitle">Notas de Crédito</p></div>
+        <div class="tile" onclick="alert('Demo: Gastos')"><p class="tileTitle">Gastos</p></div>
+        <div class="tile" onclick="alert('Demo: Libros de IVA')"><p class="tileTitle">Libros de IVA</p></div>
+        <div class="tile" onclick="alert('Demo: Antigüedad de Saldos')"><p class="tileTitle">Antigüedad de Saldos</p></div>
+        <div class="tile" onclick="alert('Demo: Saldos Anticipos Vales')"><p class="tileTitle">Saldos Anticipos Vales</p></div>
+      </div>
+
+      <!-- COLUMNA 3 -->
+      <div class="menu-col">
+        <div class="tile" onclick="alert('Demo: Estado de Cuenta')"><p class="tileTitle">Estado de Cuenta</p></div>
+        <div class="tile" onclick="alert('Demo: Pendiente de Cobro')"><p class="tileTitle">Pendiente de Cobro</p></div>
+        <div class="tile" onclick="alert('Demo: Listado Facturación')"><p class="tileTitle">Listado Facturación</p></div>
+        <div class="tile" onclick="alert('Demo: Vales para Clientes')"><p class="tileTitle">Vales para Clientes</p></div>
+        <div class="tile" onclick="alert('Demo: Chivo Wallet')"><p class="tileTitle">Chivo Wallet</p></div>
+
+        <!-- hueco como en el sistema -->
+        <div style="height:34px;"></div>
+
+        <div class="tile" onclick="alert('Demo: Venta Full/Self')"><p class="tileTitle">Venta Full/Self</p></div>
+        <div class="tile" onclick="alert('Demo: Reporte Gerencia')"><p class="tileTitle">Reporte Gerencia</p></div>
+
+        <!-- Botón Salir (solo visual) -->
+       <!-- <div class="tile" style="text-align:center;" onclick="alert('Demo: Salir (solo visual)')">
+          <p class="tileTitle">Salir</p>
+          <p class="tileDesc">Sin acción (demo)</p>
+        </div> -->
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- SCREEN: UTILERIAS -->
+<div id="Utilerias" class="screen" style="display:none;">
+  <div class="card">
+    <h3 style="margin:0 0 10px 0;">Utilerias</h3>
+
+    <div class="menu-3cols">
+
+      <!-- COLUMNA 1 -->
+      <div class="menu-col">
+        <div class="tile" onclick="alert('Demo: Integridad Ventas')"><p class="tileTitle">Integridad Ventas</p></div>
+        <div class="tile" onclick="alert('Demo: Integridad Compras')"><p class="tileTitle">Integridad Compras</p></div>
+        <div class="tile" onclick="alert('Demo: Importar Clientes')"><p class="tileTitle">Importar Clientes</p></div>
+        <div class="tile" onclick="alert('Demo: Importar Proveedores')"><p class="tileTitle">Importar Proveedores</p></div>
+        <div class="tile" onclick="alert('Demo: Importar Productos')"><p class="tileTitle">Importar Productos</p></div>
+        <div class="tile" onclick="alert('Demo: Cuadre Tarjetas')"><p class="tileTitle">Cuadre Tarjetas</p></div>
+        <div class="tile" onclick="alert('Demo: Modificar Vtas. Clientes')"><p class="tileTitle">Modificar Vtas. Clientes</p></div>
+      </div>
+
+      <!-- COLUMNA 2 -->
+      <div class="menu-col">
+        <div class="tile" onclick="alert('Demo: Modificar Islas')"><p class="tileTitle">Modificar Islas</p></div>
+
+        <!-- hueco como en el sistema -->
+        <div style="height:34px;"></div>
+
+        <div class="tile" onclick="alert('Demo: Consulta Documentos')"><p class="tileTitle">Consulta Documentos</p></div>
+        <div class="tile" onclick="alert('Demo: Modificar Compras')"><p class="tileTitle">Modificar Compras</p></div>
+        <div class="tile" onclick="alert('Demo: Verificar Existencias')"><p class="tileTitle">Verificar Existencias</p></div>
+        <div class="tile" onclick="alert('Demo: Generales Clientes')"><p class="tileTitle">Generales Clientes</p></div>
+      </div>
+
+      <!-- COLUMNA 3 -->
+      <div class="menu-col">
+        <div class="tile" onclick="alert('Demo: Modif. Enc. Compras')"><p class="tileTitle">Modif. Enc. Compras</p></div>
+        <div class="tile" onclick="alert('Demo: Modif. F987/DTE')"><p class="tileTitle">Modif. F987/DTE</p></div>
+        <div class="tile" onclick="alert('Demo: Modificar Vales')"><p class="tileTitle">Modificar Vales</p></div>
+        <div class="tile" onclick="alert('Demo: Autogenerar Tabla Cbarra')"><p class="tileTitle">Autogenerar Tabla Cbarra</p></div>
+        <div class="tile" onclick="alert('Demo: Descargas')"><p class="tileTitle">Descargas</p></div>
+        <div class="tile" onclick="alert('Demo: Mermas')"><p class="tileTitle">Mermas</p></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- SCREEN: CIERRE -->
+<div id="Cierre" class="screen" style="display:none;">
+  <div class="card">
+    <h3 style="margin:0 0 10px 0;">Cierre</h3>
+
+    <div class="menu-3cols">
+
+      <!-- COLUMNA 1 -->
+      <div class="menu-col">
+        <div class="tile" onclick="alert('Demo: Verificar Existencias')">
+          <p class="tileTitle">Verificar Existencias</p>
+        </div>
+
+        <div class="tile" onclick="alert('Demo: Toma Física')">
+          <p class="tileTitle">Toma Física</p>
+        </div>
+
+        <div class="tile" onclick="alert('Demo: Cierre de Mes')">
+          <p class="tileTitle">Cierre de Mes</p>
+        </div>
+
+        <div class="tile" onclick="alert('Demo: Físicos Mensuales')">
+          <p class="tileTitle">Físicos Mensuales</p>
+        </div>
+
+        <div class="tile" onclick="alert('Demo: Reporte de diferencias')">
+          <p class="tileTitle">Reporte de diferencias</p>
+        </div>
+
+        <!-- En el sistema original aparece “gris” (deshabilitado) -->
+        <div class="tile disabled" title="Opción no disponible">
+          <p class="tileTitle">Incluir Ajustes</p>
+        </div>
+
+        <div class="tile" onclick="alert('Demo: Trasladar Inicial')">
+          <p class="tileTitle">Trasladar Inicial</p>
+        </div>
+      </div>
+
+      <!-- COLUMNA 2 (vacía para respetar layout) -->
+      <div class="menu-col"></div>
+
+      <!-- COLUMNA 3 (vacía para respetar layout) -->
+      <div class="menu-col"></div>
+
+</div>
+</div>
+</div>
+
+      </div> <!-- /sistema -->
+    </div> <!-- /content -->
+  </div> <!-- /main -->
+</div> <!-- /container -->
+
+<!-- Modal (FUERA de las secciones) -->
+<div id="backdrop" class="modal-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="modal">
+    <div class="modal-header">
+      <div id="modalTitle">Detalle</div>
+      <button class="close-btn" id="closeBtn" type="button">Cerrar ✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+
+
+
+<script>
+  // Sidebar: cambiar sección principal
+function showSection(id, btn){
+  document.querySelectorAll(".section").forEach(sec => sec.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+
+  document.querySelectorAll(".sidebar button").forEach(b => b.classList.remove("active"));
+  if(btn) btn.classList.add("active");
+
+  // ✅ Oculta la barra solo en Contexto
+  if (id === "contexto") {
+    document.body.classList.add("hide-topbar");
+  } else {
+    document.body.classList.remove("hide-topbar");
+  }
+}
+
+
+  // Tabs internos: cambiar pantalla dentro de "Sistema"
+  function showScreen(id, tabBtn){
+    document.querySelectorAll("#sistema .screen").forEach(s => s.style.display = "none");
+    document.getElementById(id).style.display = "block";
+
+    document.querySelectorAll("#sistema .tab").forEach(t => t.classList.remove("active"));
+    tabBtn.classList.add("active");
+  }
+  
+  // Al cargar: si la sección activa es "contexto", ocultar topbar
+window.addEventListener("load", () => {
+  // 1) Ocultar topbar si arranca en contexto
+  const contexto = document.getElementById("contexto");
+  if (contexto && contexto.classList.contains("active")) {
+    document.body.classList.add("hide-topbar");
+  }
+
+  // 2) Verificar si venís con hash (#infile, etc.)
+  checkHash();
+  
+  if (window.mermaid && mermaid.run) {
+  mermaid.run();
+}
+
+  
+});
+
+
+
+  // ===== Modal del diagrama (Paso 4) =====
   const DETAILS = {
     infile: {
       title: "Infile – Factura Electrónica",
       body: `
-        <h3>Integración con INFILE</h3>
 
         <p>
           El sistema de Punto de Venta (POS) genera un archivo en formato <b>JSON</b>, el cual es enviado a <b>INFILE</b>.
@@ -122,11 +1040,9 @@ flowchart LR
         </p>
       `
     },
-
     fusion: {
       title: "Fusion – Control de Bombas",
       body: `
-        <h3>Integración con FUSION</h3>
 
         <p>
           El Punto de Venta (POS) se integra con <b>FUSION</b> para autorizar el despacho de combustible.
@@ -138,22 +1054,16 @@ flowchart LR
         </p>
       `
     },
-
     bombas: {
       title: "Bombas / Dispensadores",
-      body: `
-        <p>
-          Equipo físico de despacho. Recibe autorización desde Fusion y devuelve datos del consumo real (volumen, total, estado).
-        </p>
-      `
+      body: `     
+	  <p>Equipo físico de despacho. Recibe autorización desde Fusion y devuelve datos del consumo real (volumen, total, estado).</p>
+	  `
     },
-
     inventario: {
       title: "Sistema de Inventario Físicos",
       body: `
-        <h3>Integración con HYPERION</h3>
-
-        <p>
+                <p>
           El Punto de Venta (POS) genera un archivo <b>CSV</b> con el catálogo completo de productos del Market, incluyendo la existencia teórica (<i>on hand</i>) de cada artículo.
         </p>
 
@@ -166,13 +1076,10 @@ flowchart LR
         </p>
       `
     },
-
     recetas: {
       title: "Sistema de Producción y Recetas",
       body: `
-        <h3>Integración con Sistema de Recetas</h3>
-
-        <p>
+                <p>
           El sistema de Punto de Venta (POS) utiliza el sistema de recetas para realizar el descargue del inventario de los materiales utilizados en la preparación de productos.
         </p>
 
@@ -182,13 +1089,10 @@ flowchart LR
         </p>
       `
     },
-
     central: {
       title: "Servidor Central (Multi-Estación)",
       body: `
-        <h3>Integración con Servidor Central</h3>
-
-        <p>
+                <p>
           El sistema de Punto de Venta (POS) recibe desde el <b>Servidor Central</b> información como listas de precios, catálogo de artículos, usuarios, promociones y otros parámetros necesarios para la operación.
         </p>
 
@@ -197,39 +1101,20 @@ flowchart LR
         </p>
       `
     },
-
     sap: {
       title: "SAP Business One",
       body: `
-        <h3>Integración del Servidor Central con SAP</h3>
-
-        <p>
-          El <b>Servidor Central</b> permite parametrizar los niveles de consolidación de datos que serán transmitidos al sistema <b>SAP</b>, facilitando la integración con los procesos administrativos y contables.
-        </p>
-
-        <p>
-          Asimismo, el Servidor Central recibe desde SAP información maestra necesaria para la operación de los puntos de venta, incluyendo catálogo de productos, proveedores y configuraciones relacionadas.
-        </p>
+                <p>
+            El <b>Servidor Central</b> permite parametrizar los niveles de consolidación de datos que serán transmitidos al sistema <b>SAP</b>, facilitando la integración con los procesos administrativos y contables.
+          </p>
+  
+          <p>
+            Asimismo, el Servidor Central recibe desde SAP información maestra necesaria para la operación de los puntos de venta, incluyendo catálogo de productos, proveedores y configuraciones relacionadas.
+          </p>
       `
     },
-
-    pos: {
-      title: "Punto de Venta (POS) – Estación A",
-      body: `
-        <p>
-          Registra ventas de <b>Market</b> y <b>Combustible</b>. Orquesta el proceso: cobra, factura y sincroniza.
-        </p>
-      `
-    },
-
-    pos2: {
-      title: "Punto de Venta (POS) – Estación B",
-      body: `
-        <p>
-          Otro POS adicional para demostrar que el Servidor Central atiende varias estaciones/tiendas.
-        </p>
-      `
-    }
+    pos:  { title: "POS – Estación A", body: `<p>Registra ventas Market y Combustible. Cobra, factura y sincroniza.</p>` },
+    pos2: { title: "POS – Estación B", body: `<p>Segundo POS para evidenciar multi-estación.</p>` }
   };
 
   const backdrop = document.getElementById("backdrop");
@@ -237,28 +1122,56 @@ flowchart LR
   const modalBody = document.getElementById("modalBody");
   const closeBtn = document.getElementById("closeBtn");
 
-  function openModal(key) {
+  function openModal(key){
     const info = DETAILS[key];
-    if (!info) return;
+    if(!info) return;
     modalTitle.textContent = info.title;
     modalBody.innerHTML = info.body;
     backdrop.style.display = "flex";
+    backdrop.setAttribute("aria-hidden","false");
+	
+	console.log("openModal:", key);
+
   }
 
-  function closeModal() {
+  function closeModal(){
     backdrop.style.display = "none";
+    backdrop.setAttribute("aria-hidden","true");
     history.replaceState(null, "", window.location.pathname + window.location.search);
   }
 
-  function checkHash() {
-    const key = window.location.hash.replace("#", "");
-    if (key) openModal(key);
+  function checkHash(){
+    const key = window.location.hash.replace("#","");
+    if(key) openModal(key);
   }
 
-  window.addEventListener("hashchange", checkHash);
   closeBtn.addEventListener("click", closeModal);
-  backdrop.addEventListener("click", (e) => { if (e.target === backdrop) closeModal(); });
-  window.addEventListener("keydown", (e) => { if (e.key === "Escape") closeModal(); });
+  backdrop.addEventListener("click", (e)=>{ if(e.target === backdrop) closeModal(); });
+  window.addEventListener("hashchange", checkHash);
+  //window.addEventListener("load", checkHash);
 
-  checkHash();
+// --- Capturar clicks del diagrama Mermaid (robusto) ---
+document.addEventListener("click", (e) => {
+  const a = e.target.closest("a");
+  if (!a) return;
+
+  // Mermaid en SVG puede usar href o xlink:href
+  const href = a.getAttribute("href") || a.getAttribute("xlink:href") || "";
+  if (!href.startsWith("#")) return;
+
+  const key = href.slice(1);
+  if (DETAILS[key]) {
+    e.preventDefault();
+    openModal(key);
+  }
+});
+
 </script>
+
+</body>
+
+</html>
+
+
+
+
