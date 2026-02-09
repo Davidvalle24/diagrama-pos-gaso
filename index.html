@@ -562,9 +562,22 @@
 
 		<div class="card">
 		  <div class="mermaid">
-		flowchart LR
-		  POS["Punto de Venta (POS) - Estación A<br/>──────────────<br/>Market | Bombas"]
-		  POS2["Punto de Venta (POS) - Estación B<br/>──────────────<br/>Market | Bombas"]
+
+flowchart LR
+  POS["Servidor Local POS
+─────────────────
+POS                 POS
+─────               ─────
+Market              Bombas"]
+
+  POS2["Servidor Local POS
+─────────────────
+POS                 POS
+─────               ─────
+Market              Bombas"]
+
+
+
 
 		  FE["Infile Factura Electrónica"]
 		  FUS["Fusion (Control Bombas)"]
